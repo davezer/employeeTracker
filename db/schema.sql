@@ -12,7 +12,7 @@ CREATE TABLE role (
     title VARCHAR(30),
     salary DECIMAL,
     department_id INTEGER
-)
+);
 
 CREATE TABLE employee (
     id PRIMARY KEY,
@@ -20,4 +20,4 @@ CREATE TABLE employee (
     last_name VARCHAR(30),
     role_id INTEGER,
     manager_id INTEGER NULL 
-)
+);
