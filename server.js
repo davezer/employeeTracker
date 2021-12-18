@@ -1,6 +1,6 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const cTable = require('console.table');
+const consoleTable = require('console.table');
 
 require('dotenv').config();
 
@@ -38,10 +38,33 @@ const userPrompts = () => {
             ]
         }
     ]).then((answers) => {
-        const { choices } = answers;
+        // console.log(answers);
+        const choices = answers.action;
+        // console.log(choices);
         // finish this as functions are built
         if (choices === 'View all employees') {
             showEmployees();
+        }
+        if (choices === 'View all deparments') {
+            showDepartments();
+        }
+        if (choices === 'View all roles') {
+
+        }
+        if (choices === 'Add an employee') {
+            addEmployee();
+        }
+        if (choices === 'Add a department') {
+            addDepartment();
+        }
+        if (choices === 'Add a role') {
+
+        }
+        if (choices === 'Update and employee role') {
+
+        }
+        if (choices === 'Delete an employee') {
+
         }
         if (choices === 'Exit') {
             exitApp();
@@ -52,19 +75,19 @@ const userPrompts = () => {
 // view all employees in database
 showEmployees = () => {
     console.log('Showing all employees');
-    const sql = `SELECT employee.id,
-                        employee.first_name,
-                        employee.last_name,
-                        role.title,
-                        department.name AS department,
-                        role.salary,
-                        CONCAT (manager.first_name, " ", manager.last_name) AS manager
-                FROM employee
-                    LEFT JOIN role ON employee.role_id = role.id
-                    LEFT JOIN department ON role.department_id = department_id
-                    LEFT JOIN employee manager ON employee.manager_id = manager_id`;
+    const sql = `SELECT employee.id, 
+                employee.first_name, 
+                employee.last_name, 
+                role.title, 
+                department.name AS department,
+                role.salary, 
+                CONCAT (manager.first_name, " ", manager.last_name) AS manager
+            FROM employee
+                LEFT JOIN role ON employee.role_id = role.id
+                LEFT JOIN department ON role.department_id = department.id
+                LEFT JOIN employee manager ON employee.manager_id = manager.id`;
     
-    connection.promise().query(sql, (err, rows) => {
+    connection.query(sql, (err, rows) => {
         if (err) throw err;
         console.table(rows);
         userPrompts();
@@ -72,6 +95,17 @@ showEmployees = () => {
 };
 
 // view all departments in the database
+
+showDepartments = () => {
+    console.log('Showing all departments...\n');
+    const sql = `SELECT department.id AS id, department.name AS department FROM department`; 
+  
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        promptUser();
+    });
+};
 
 // view all roles in the database
 
@@ -105,12 +139,12 @@ addEmployee = () => {
             }
         }
     ]).then(answer => {
-        const params = [answer.firstName, answer. lastName]
+        const params = [answer.firstName, answer.lastName]
 
         // grab roles from roles table
         const roleSql = `SELECT role.id, role.title FROM role`;
 
-        connection.promise().query(roleSql, (err, data) => {
+        connection.query(roleSql, (err, data) => {
             if (err) throw err;
 
             const roles = data.map(({ id, title }) => ({ name: title, value: id }));
@@ -128,7 +162,7 @@ addEmployee = () => {
 
                 const managerSql = `SELECT * FROM employee`;
 
-                connection.promise().query(managerSql, (err, data) => {
+                connection.query(managerSql, (err, data) => {
                     if (err) throw err;
 
                     const managers = data.map (({ id, first_name, last_name }) => ({ name: first_name + " " + last_name, value: id}));
@@ -145,8 +179,8 @@ addEmployee = () => {
                         const manager = managerChoice.manager;
                         params.push(manager);
 
-                        const sql = `INSTER INTO employee (first_name, last_name, role_id, manager_id)
-                        VALUES (?, ?, ?, ?)`;
+                        const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                    VALUES (?, ?, ?, ?)`;
 
                         connection.query(sql, params, (err, res) => {
                             if (err) throw err;
@@ -162,6 +196,33 @@ addEmployee = () => {
 };
 
 // add a department to the database
+
+addDepartment = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'addDepartment',
+            message: 'What department would you like to add?',
+            validate: addDepartment => {
+                if (addDepartment){
+                    return true;  
+                } else {
+                    console.log('Please enter a department!');
+                    return false;
+                }
+            }
+        }
+    ]).then(answer => {
+        const sql = `INSERT INTO department (name)
+                    VALUES (?)`;
+        connection.query(sql, answer.addDepartment, (err, res) => {
+            if (err) throw err;
+            console.log('Added ' + answer.addDepartment + ' to departments!');
+
+            showDepartments();
+        });
+    });
+};
 
 // add a role to the database
 
