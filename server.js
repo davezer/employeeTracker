@@ -14,10 +14,30 @@ const connection = mysql.createConnection({
 
 connection.connect(err => {
     if (err) throw err;
-    console.log('connected as id');
+    console.log('connected to database');
 });
 
 // prompt user with list of options to choose from
+function options() {
+    inquirer.prompt ({
+        name: 'action',
+        type: 'list',
+        message: 'Welcome to the employee database. What would you like to do?',
+        choices: [
+                'View all employees',
+                'view all departments',
+                'View all roles',
+                'Add an employee',
+                'Add a department',
+                'Add a role',
+                'Update an employee role',
+                'Delete an employee',
+                'Exit'
+        ]
+    }).then(function (answer) {
+        // finish this when functions are built
+    })
+}
 
 // view all employees in database
 
