@@ -1,6 +1,5 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-
 const cTable = require('console.table');
 
 require('dotenv').config();
@@ -67,7 +66,7 @@ showEmployees = () => {
     
     connection.promise().query(sql, (err, rows) => {
         if (err) throw err;
-        console.log(rows);
+        console.table(rows);
         userPrompts();
     })
 };
