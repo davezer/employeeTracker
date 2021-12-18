@@ -1,5 +1,6 @@
-const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const inquirer = require('inquirer');
+
 const cTable = require('console.table');
 
 require('dotenv').config();
@@ -15,34 +16,39 @@ const connection = mysql.createConnection({
 connection.connect(err => {
     if (err) throw err;
     console.log('connected to database');
-    options();
+    userPrompts();
 });
 
 // prompt user with list of options to choose from
-function options() {
-    inquirer.prompt ({
-        name: 'action',
-        type: 'list',
-        message: 'Welcome to the employee database. What would you like to do?',
-        choices: [
-                'View all employees',
-                'View all departments',
-                'View all roles',
-                'Add an employee',
-                'Add a department',
-                'Add a role',
-                'Update an employee role',
-                'Delete an employee',
-                'Exit'
-        ]
-    }).then((answers) => {
+const userPrompts = () => {
+    inquirer.prompt ([
+        {
+            name: 'action',
+            type: 'list',
+            message: 'Welcome to the employee database. What would you like to do?',
+            choices: [
+                    'View all employees',
+                    'View all departments',
+                    'View all roles',
+                    'Add an employee',
+                    'Add a department',
+                    'Add a role',
+                    'Update an employee role',
+                    'Delete an employee',
+                    'Exit'
+            ]
+        }
+    ]).then((answers) => {
         const { choices } = answers;
         // finish this as functions are built
         if (choices === 'View all employees') {
             showEmployees();
         }
-    })
-}
+        if (choices === 'Exit') {
+            exitApp();
+        };
+    });
+};
 
 // view all employees in database
 showEmployees = () => {
@@ -61,18 +67,16 @@ showEmployees = () => {
     
     connection.promise().query(sql, (err, rows) => {
         if (err) throw err;
-        console.table(rows);
-        options();
+        console.log(rows);
+        userPrompts();
     })
 };
-
 
 // view all departments in the database
 
 // view all roles in the database
 
 // add an employee to the database
-
 addEmployee = () => {
     inquirer.prompt([
         {
@@ -150,13 +154,13 @@ addEmployee = () => {
                             console.log('Employee has been added to the database!');
 
                             showEmployees();
-                        })
-                    })
-                })
-            })
-        })
-    })
-}
+                        });
+                    });
+                });
+            });
+        });
+    });
+};
 
 // add a department to the database
 
@@ -165,3 +169,7 @@ addEmployee = () => {
 // update a role
 
 // delete an employee
+
+exitApp = () => {
+    connection.end();
+};
