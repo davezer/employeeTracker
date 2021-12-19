@@ -1,23 +1,11 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const consoleTable = require('console.table');
-const { param } = require('express/lib/request');
+const connection = require('./config/connection');
 
 require('dotenv').config();
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: process.env.DB_USER,
-    password: process.env.DB_PW,
-    database: 'employee_db',
-    port: 3306
-});
 
-connection.connect(err => {
-    if (err) throw err;
-    console.log('connected to database');
-    userPrompts();
-});
 
 // prompt user with list of options to choose from
 const userPrompts = () => {
@@ -116,16 +104,16 @@ showDepartments = () => {
 showRoles = () => {
     console.log('Showing all roles');
     const sql = `SELECT role.id, role.title, department.name AS department
-                FROM role
-                INNER JOIN department ON role.department_id = department_id`;
+               FROM role
+               INNER JOIN department ON role.department_id = department.id`;
 
     connection.query(sql, (err, rows) => {
         if (err) throw err;
 
         console.table(rows);
         userPrompts();
-    })
-}
+    });
+};
 
 // add an employee to the database
 addEmployee = () => {
@@ -462,3 +450,5 @@ deleteEmployee = () => {
 exitApp = () => {
     connection.end();
 };
+
+userPrompts();
