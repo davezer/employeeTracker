@@ -487,6 +487,34 @@ deleteDepartment = () => {
 };
 
 // delete role
+deleteRole = () => {
+    const roleSql = `SELECT * FROM role`;
+
+    connection.query(roleSql, (err, data ) => {
+        if (err) throw err;
+
+        const role = data.map(({ title, id }) => ({ name: title, value: id}));
+
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'role',
+                message: 'Which role would you like to delete?',
+                choices: role
+            }
+        ]).then(roleChoice => {
+            const role = roleChoice.role;
+            const sql = `DELETE FROM role WHERE id = ?`;
+
+            connection.query(sql, role, (err, res) => {
+                if (err) throw err;
+                console.log('Successfully deleted role!');
+
+                showRoles();
+            });
+        });
+    });
+};
 
 exitApp = () => {
     connection.end();
