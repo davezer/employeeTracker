@@ -38,18 +38,18 @@ const userPrompts = () => {
             ]
         }
     ]).then((answers) => {
-        // console.log(answers);
+        console.log(answers);
         const choices = answers.action;
         // console.log(choices);
         // finish this as functions are built
         if (choices === 'View all employees') {
             showEmployees();
         }
-        if (choices === 'View all deparments') {
+        if (choices === 'View all departments') {
             showDepartments();
         }
         if (choices === 'View all roles') {
-
+            showRoles();
         }
         if (choices === 'Add an employee') {
             addEmployee();
@@ -58,9 +58,9 @@ const userPrompts = () => {
             addDepartment();
         }
         if (choices === 'Add a role') {
-
+            addRole();
         }
-        if (choices === 'Update and employee role') {
+        if (choices === 'Update an employee role') {
 
         }
         if (choices === 'Delete an employee') {
@@ -103,11 +103,24 @@ showDepartments = () => {
     connection.query(sql, (err, rows) => {
         if (err) throw err;
         console.table(rows);
-        promptUser();
+        userPrompts();
     });
 };
 
 // view all roles in the database
+showRoles = () => {
+    console.log('Showing all roles');
+    const sql = `SELECT role.id, role.title, department.name AS department
+                FROM role
+                INNER JOIN department ON role.department_id = department_id`;
+
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+
+        console.table(rows);
+        userPrompts();
+    })
+}
 
 // add an employee to the database
 addEmployee = () => {
@@ -225,6 +238,70 @@ addDepartment = () => {
 };
 
 // add a role to the database
+
+addRole = () => {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'role',
+            message: 'Which role would you like to add?',
+            validate: addRole => {
+                if (addRole) {
+                    return true;
+                } else {
+                    console.log('Please enter a role');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of this role',
+            validate: addSalary => {
+                if (addSalary) {
+                    return true;  
+                } else {
+                    console.log('Please add a salary');
+                    return false;
+                }
+            } 
+        }
+        
+    ]).then(answer => {
+        const params = [answer.role, answer.salary];
+
+        const roleSql = `SELECT name, id FROM department`;
+
+        connection.query(roleSql, (err, data) => {
+            if (err) throw err;
+
+            const dept = data.map(({ name, id }) => ({ name: name, value: id }));
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'dept',
+                    message: 'What department is this role in?',
+                    choices: dept
+                }
+            ]).then(deptChoice => {
+                const dept = deptChoice.dept;
+                params.push(dept);
+
+                const sql = `INSERT INTO role (title, salary, department_id)
+                            VALUES (?, ?, ?)`;
+
+                connection.query(sql, params, (err, res) => {
+                    if (err) throw err;
+                    console.log ('Added ' + answer.role + 'to roles.');
+
+                    showRoles();
+                });
+            });
+        });
+    });
+};
 
 // update a role
 
