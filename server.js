@@ -26,11 +26,13 @@ const userPrompts = () => {
                     'Delete an employee',
                     'Delete a department',
                     'Delete a role',
+                    'View employee by department',
+                    'Show budget',
                     'Exit'
             ]
         }
     ]).then((answers) => {
-        console.log(answers);
+        // console.log(answers);
         const choices = answers.action;
         // console.log(choices);
         // finish this as functions are built
@@ -66,6 +68,12 @@ const userPrompts = () => {
         }
         if (choices === 'Delete a role') {
             deleteRole();
+        }
+        if (choices === 'View employee by department') {
+            empDept();
+        }
+        if (choices === 'Show budget') {
+            showBudget();
         }
         if (choices === 'Exit') {
             exitApp();
@@ -515,6 +523,39 @@ deleteRole = () => {
         });
     });
 };
+
+// view employee by department
+empDept = () => {
+    const sql = `SELECT employee.first_name,
+                        employee.last_name,
+                        department.name AS department
+                FROM employee
+                LEFT JOIN role ON employee.role_id = role.id
+                LEFT JOIN department ON role.department_id = department.id`;
+    
+    connection.query(sql, (err, rows) => {
+        if (err) throw err;
+        console.table(rows);
+        userPrompts();
+    });
+
+};
+
+
+// view budget -- if i can get it to work
+showBudget = () => {
+    const sql = `SELECT department_id AS id, 
+                        department.name AS department,
+                SUM(salary) AS budget
+                FROM role  
+                JOIN department ON role.department_id = department.id GROUP BY  department_id`;
+    connection.query(sql, (err, rows) => { 
+        if (err) throw err;
+        console.table(rows);
+
+        userPrompts();
+    })
+}
 
 exitApp = () => {
     connection.end();
