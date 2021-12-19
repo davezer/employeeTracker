@@ -18,7 +18,9 @@ VALUES
 
 INSERT INTO employee ( first_name, last_name, role_id, manager_id)
 VALUES
-('Dave', 'Oliverio', 1, null),
-('Liz', 'Oliverio', 1, 1),
-('Jeff', 'Cohn', 4, null),
-('Eric', 'Drumm', 3, 3);
+('Richard', 'Hendricks', 1, null),
+('Erlich', 'Bachman', 1, 1),
+('Nelson', 'Bighetti', 4, 1),
+('Bertram', 'Gilfoyle', 2, null),
+('Jared', 'Dunn', 4, 1),
+('Monica', 'Hall', 8, 4);
