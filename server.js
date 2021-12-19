@@ -34,6 +34,7 @@ const userPrompts = () => {
                     'Add a department',
                     'Add a role',
                     'Update an employee role',
+                    'Update an employee manager',
                     'Delete an employee',
                     'Exit'
             ]
@@ -63,6 +64,9 @@ const userPrompts = () => {
         }
         if (choices === 'Update an employee role') {
             updateEmployee();
+        }
+        if (choices === 'Update an employee manager') {
+            updateManager();
         }
         if (choices === 'Delete an employee') {
             deleteEmployee();
@@ -210,7 +214,6 @@ addEmployee = () => {
 };
 
 // add a department to the database
-
 addDepartment = () => {
     inquirer.prompt([
         {
@@ -239,7 +242,6 @@ addDepartment = () => {
 };
 
 // add a role to the database
-
 addRole = () => {
     inquirer.prompt([
         {
@@ -353,6 +355,67 @@ updateEmployee = () => {
     
                     const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
     
+                    connection.query(sql, params, (err, result) => {
+                        if (err) throw err;
+                        console.log("Employee has been updated!");
+                        
+                        showEmployees();
+                    });
+                });
+            });
+        });
+    });
+};
+
+// update an employee manager
+updateManager = () => {
+    // get employees from employee table 
+    const employeeSql = `SELECT * FROM employee`;
+  
+    connection.query(employeeSql, (err, data) => {
+        if (err) throw err; 
+  
+        const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+  
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'name',
+                    message: "Which employee would you like to update?",
+                    choices: employees
+                }
+            ]).then(empChoice => {
+                const employee = empChoice.name;
+                const params = []; 
+                params.push(employee);
+        
+                const managerSql = `SELECT * FROM employee`;
+    
+                connection.query(managerSql, (err, data) => {
+                if (err) throw err; 
+    
+                const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+                
+                    inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'manager',
+                        message: "Who is the employee's manager?",
+                        choices: managers
+                    }
+                ]).then(managerChoice => {
+                    const manager = managerChoice.manager;
+                    params.push(manager); 
+                    
+                    let employee = params[0]
+                    params[0] = manager
+                    params[1] = employee 
+                
+
+                    // console.log(params)
+
+                    const sql = `UPDATE employee SET manager_id = ? WHERE id = ?`;
+
                     connection.query(sql, params, (err, result) => {
                         if (err) throw err;
                         console.log("Employee has been updated!");
