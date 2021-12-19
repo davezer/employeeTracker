@@ -24,6 +24,8 @@ const userPrompts = () => {
                     'Update an employee role',
                     'Update an employee manager',
                     'Delete an employee',
+                    'Delete a department',
+                    'Delete a role',
                     'Exit'
             ]
         }
@@ -58,6 +60,12 @@ const userPrompts = () => {
         }
         if (choices === 'Delete an employee') {
             deleteEmployee();
+        }
+        if (choices === 'Delete a department') {
+            deleteDepartment();
+        }
+        if (choices === 'Delete a role') {
+            deleteRole();
         }
         if (choices === 'Exit') {
             exitApp();
@@ -446,6 +454,39 @@ deleteEmployee = () => {
             });
     });
 };
+
+// delete department
+deleteDepartment = () => {
+    const deptSql = `SELECT * FROM department`; 
+  
+    connection.query(deptSql, (err, data) => {
+        if (err) throw err; 
+  
+        const dept = data.map(({ name, id }) => ({ name: name, value: id }));
+  
+        inquirer.prompt([
+            {
+                type: 'list', 
+                name: 'dept',
+                message: "What department do you want to delete?",
+                choices: dept
+            }
+        ])
+        .then(deptChoice => {
+            const dept = deptChoice.dept;
+            const sql = `DELETE FROM department WHERE id = ?`;
+  
+            connection.query(sql, dept, (err, result) => {
+                if (err) throw err;
+                console.log("Successfully deleted!"); 
+  
+                showDepartments();
+            });
+        });
+    });
+};
+
+// delete role
 
 exitApp = () => {
     connection.end();
